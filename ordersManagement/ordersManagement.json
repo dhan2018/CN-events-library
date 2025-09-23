@@ -1,0 +1,383 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Order Management Events API",
+    "description": "Event schemas for order lifecycle management in a Kafka-based event-driven system for ISP services",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "CustomerDetails": {
+        "type": "object",
+        "description": "Customer information",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "The customer's full legal name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The customer's primary email address"
+          },
+          "mobileNumber": {
+            "type": "string",
+            "description": "The customer's mobile phone number"
+          }
+        },
+        "required": ["fullName", "email", "mobileNumber"]
+      },
+      "Address": {
+        "type": "object",
+        "description": "Physical address information",
+        "properties": {
+          "street": {
+            "type": "string",
+            "description": "Street name and number"
+          },
+          "city": {
+            "type": "string",
+            "description": "City name"
+          },
+          "state": {
+            "type": "string",
+            "description": "State or province"
+          },
+          "zipCode": {
+            "type": "string",
+            "description": "Postal or ZIP code"
+          }
+        },
+        "required": ["street", "city", "state", "zipCode"]
+      },
+      "Appointment": {
+        "type": "object",
+        "description": "Appointment scheduling details",
+        "properties": {
+          "preferredDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The customer's preferred date for installation or service"
+          },
+          "timeSlot": {
+            "type": "string",
+            "enum": ["Morning (8-12)", "Afternoon (1-5)", "Anytime"],
+            "description": "The customer's preferred time window"
+          }
+        },
+        "required": ["preferredDate", "timeSlot"]
+      },
+      "Price": {
+        "type": "object",
+        "description": "Price information",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "The numeric value of the price"
+          },
+          "currency": {
+            "type": "string",
+            "default": "USD",
+            "description": "The currency code (e.g., USD)"
+          }
+        },
+        "required": ["amount", "currency"]
+      },
+      "OrderLineItem": {
+        "type": "object",
+        "description": "Individual line item in an order",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "description": "A unique identifier for this line item"
+          },
+          "productType": {
+            "type": "string",
+            "enum": ["Data", "Voice", "Video", "AddOn"],
+            "description": "The category of the product"
+          },
+          "productName": {
+            "type": "string",
+            "description": "The commercial name of the product (e.g., 'Fiber Internet 1 Gig')"
+          },
+          "monthlyPrice": {
+            "$ref": "#/components/schemas/Price"
+          },
+          "oneTimePrice": {
+            "$ref": "#/components/schemas/Price"
+          }
+        },
+        "required": ["itemId", "productType", "productName"]
+      },
+      "OrderCreatedEvent": {
+        "type": "object",
+        "description": "Event fired when a customer submits a new order for activation",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this order"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerDetails"
+          },
+          "serviceAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "billingAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "preferredAppointment": {
+            "$ref": "#/components/schemas/Appointment"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          },
+          "totalMonthlyPrice": {
+            "$ref": "#/components/schemas/Price"
+          },
+          "totalOneTimePrice": {
+            "$ref": "#/components/schemas/Price"
+          }
+        },
+        "required": [
+          "orderId",
+          "customer",
+          "serviceAddress",
+          "billingAddress",
+          "preferredAppointment",
+          "lineItems"
+        ]
+      },
+      "OrderSavedEvent": {
+        "type": "object",
+        "description": "Event fired when a customer saves a draft order without submitting",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this draft order"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerDetails"
+          },
+          "serviceAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "billingAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "preferredAppointment": {
+            "$ref": "#/components/schemas/Appointment"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          }
+        },
+        "required": ["orderId", "customer", "serviceAddress"]
+      },
+      "OrderConfirmedEvent": {
+        "type": "object",
+        "description": "Event fired when order is validated and accepted for fulfillment",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the order being confirmed"
+          },
+          "confirmationTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the order was confirmed"
+          },
+          "status": {
+            "type": "string",
+            "default": "Confirmed",
+            "description": "The new status of the order"
+          }
+        },
+        "required": ["orderId", "confirmationTimestamp"]
+      },
+      "OrderUpdatedEvent": {
+        "type": "object",
+        "description": "Event fired when an existing unfulfilled order is modified",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the order being updated"
+          },
+          "updatedTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp of the update"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerDetails"
+          },
+          "serviceAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "billingAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "preferredAppointment": {
+            "$ref": "#/components/schemas/Appointment"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          }
+        },
+        "required": ["orderId", "updatedTimestamp"]
+      },
+      "OrderCancelledEvent": {
+        "type": "object",
+        "description": "Event fired when an order is cancelled before fulfillment",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the order being cancelled"
+          },
+          "cancellationTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the order was cancelled"
+          },
+          "reason": {
+            "type": "string",
+            "description": "The reason for the cancellation"
+          }
+        },
+        "required": ["orderId", "cancellationTimestamp", "reason"]
+      }
+    }
+  },
+  "paths": {
+    "/events/order-created": {
+      "post": {
+        "summary": "Order Created Event",
+        "description": "Publishes an order creation event to Kafka topic: order-created",
+        "tags": ["Order Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreatedEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-saved": {
+      "post": {
+        "summary": "Order Saved Event",
+        "description": "Publishes an order save event to Kafka topic: order-saved",
+        "tags": ["Order Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderSavedEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-confirmed": {
+      "post": {
+        "summary": "Order Confirmed Event",
+        "description": "Publishes an order confirmation event to Kafka topic: order-confirmed",
+        "tags": ["Order Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderConfirmedEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-updated": {
+      "post": {
+        "summary": "Order Updated Event",
+        "description": "Publishes an order update event to Kafka topic: order-updated",
+        "tags": ["Order Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderUpdatedEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-cancelled": {
+      "post": {
+        "summary": "Order Cancelled Event",
+        "description": "Publishes an order cancellation event to Kafka topic: order-cancelled",
+        "tags": ["Order Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCancelledEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Order Events",
+      "description": "Events related to order lifecycle management"
+    }
+  ]
+}

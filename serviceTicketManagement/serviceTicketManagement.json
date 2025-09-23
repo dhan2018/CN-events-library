@@ -1,0 +1,372 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Service Ticket Management Events API",
+    "description": "Event schemas for service ticket (trouble ticket) lifecycle management in a Kafka-based event-driven system for ISP service assurance operations",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "ContactInfo": {
+        "type": "object",
+        "description": "Standard contact information for a person",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "The person's full name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The person's email address"
+          },
+          "mobileNumber": {
+            "type": "string",
+            "description": "The person's mobile phone number"
+          }
+        },
+        "required": ["fullName", "mobileNumber"]
+      },
+      "Address": {
+        "type": "object",
+        "description": "A physical service or mailing address",
+        "properties": {
+          "street": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "zipCode": {
+            "type": "string"
+          }
+        },
+        "required": ["street", "city", "state", "zipCode"]
+      },
+      "Appointment": {
+        "type": "object",
+        "description": "Details for a scheduled technician visit",
+        "properties": {
+          "appointmentDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The confirmed date for the technician visit"
+          },
+          "timeSlot": {
+            "type": "string",
+            "enum": ["Morning (8-12)", "Afternoon (1-5)"],
+            "description": "The confirmed time window for the visit"
+          }
+        },
+        "required": ["appointmentDate", "timeSlot"]
+      },
+      "TicketLogEntry": {
+        "type": "object",
+        "description": "An entry in the ticket's history log",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "author": {
+            "type": "string",
+            "description": "Name of the person or system that made the entry"
+          },
+          "note": {
+            "type": "string",
+            "description": "The content of the log entry or note"
+          }
+        },
+        "required": ["timestamp", "author", "note"]
+      },
+      "ServiceTicketCreatedEvent": {
+        "type": "object",
+        "description": "Event fired when a customer reports a new service issue",
+        "properties": {
+          "ticketId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this service ticket"
+          },
+          "customerId": {
+            "type": "string",
+            "description": "The unique identifier for the customer account"
+          },
+          "customerContact": {
+            "$ref": "#/components/schemas/ContactInfo"
+          },
+          "serviceAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "problemDescription": {
+            "type": "string",
+            "description": "A detailed description of the issue reported by the customer"
+          },
+          "serviceType": {
+            "type": "string",
+            "enum": ["Data", "Voice", "Video", "General"],
+            "description": "The type of service affected"
+          },
+          "creationTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the ticket was created"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["High", "Medium", "Low"],
+            "default": "Medium"
+          }
+        },
+        "required": [
+          "ticketId",
+          "customerId",
+          "customerContact",
+          "serviceAddress",
+          "problemDescription",
+          "serviceType"
+        ]
+      },
+      "ServiceTicketUpdatedEvent": {
+        "type": "object",
+        "description": "Event fired when ticket is updated with new information or status change",
+        "properties": {
+          "ticketId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the ticket being updated"
+          },
+          "newStatus": {
+            "type": "string",
+            "enum": ["Open", "Diagnosing", "Pending Dispatch", "Resolved", "Closed"],
+            "description": "The new status of the ticket"
+          },
+          "logEntry": {
+            "$ref": "#/components/schemas/TicketLogEntry"
+          }
+        },
+        "required": ["ticketId"]
+      },
+      "ServiceTicketDispatchScheduledEvent": {
+        "type": "object",
+        "description": "Event fired when a technician visit is scheduled for a ticket",
+        "properties": {
+          "ticketId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the ticket"
+          },
+          "technicianId": {
+            "type": "string",
+            "description": "The ID of the assigned field technician"
+          },
+          "appointmentDetails": {
+            "$ref": "#/components/schemas/Appointment"
+          },
+          "onSiteContact": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactInfo"
+              },
+              {
+                "description": "Contact info for the person the technician should call upon arrival (e.g., a spouse or family member)"
+              }
+            ]
+          }
+        },
+        "required": ["ticketId", "technicianId", "appointmentDetails", "onSiteContact"]
+      },
+      "ServiceTicketResolvedEvent": {
+        "type": "object",
+        "description": "Event fired when a technician has completed work and resolved the issue",
+        "properties": {
+          "ticketId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the resolved ticket"
+          },
+          "resolutionTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedBy": {
+            "type": "string",
+            "description": "Name or ID of the technician who resolved the issue"
+          },
+          "resolutionCode": {
+            "type": "string",
+            "enum": ["Fixed Remotely", "Replaced Equipment", "Repaired Wiring", "Configuration Change"],
+            "description": "A code indicating the type of resolution"
+          },
+          "resolutionNotes": {
+            "$ref": "#/components/schemas/TicketLogEntry"
+          }
+        },
+        "required": ["ticketId", "resolutionTimestamp", "resolvedBy", "resolutionCode", "resolutionNotes"]
+      }
+    }
+  },
+  "paths": {
+    "/events/service-ticket-created": {
+      "post": {
+        "summary": "Service Ticket Created Event",
+        "description": "Publishes a service ticket creation event to Kafka topic: service-ticket-created",
+        "tags": ["Service Ticket Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketCreatedEvent"
+              },
+              "example": {
+                "ticketId": "550e8400-e29b-41d4-a716-446655440000",
+                "customerId": "CUST-12345",
+                "customerContact": {
+                  "fullName": "John Smith",
+                  "email": "john.smith@email.com",
+                  "mobileNumber": "+1-555-123-4567"
+                },
+                "serviceAddress": {
+                  "street": "123 Main St",
+                  "city": "Springfield",
+                  "state": "IL",
+                  "zipCode": "62701"
+                },
+                "problemDescription": "Internet connection has been intermittent for the past 2 days",
+                "serviceType": "Data",
+                "creationTimestamp": "2024-01-15T10:30:00Z",
+                "priority": "Medium"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          },
+          "400": {
+            "description": "Invalid event data"
+          }
+        }
+      }
+    },
+    "/events/service-ticket-updated": {
+      "post": {
+        "summary": "Service Ticket Updated Event",
+        "description": "Publishes a service ticket update event to Kafka topic: service-ticket-updated",
+        "tags": ["Service Ticket Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketUpdatedEvent"
+              },
+              "example": {
+                "ticketId": "550e8400-e29b-41d4-a716-446655440000",
+                "newStatus": "Diagnosing",
+                "logEntry": {
+                  "timestamp": "2024-01-15T11:15:00Z",
+                  "author": "Tech Support Agent",
+                  "note": "Ran remote diagnostics - detected signal strength issues"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          },
+          "400": {
+            "description": "Invalid event data"
+          }
+        }
+      }
+    },
+    "/events/service-ticket-dispatch-scheduled": {
+      "post": {
+        "summary": "Service Ticket Dispatch Scheduled Event",
+        "description": "Publishes a technician dispatch scheduling event to Kafka topic: service-ticket-dispatch-scheduled",
+        "tags": ["Service Ticket Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketDispatchScheduledEvent"
+              },
+              "example": {
+                "ticketId": "550e8400-e29b-41d4-a716-446655440000",
+                "technicianId": "TECH-789",
+                "appointmentDetails": {
+                  "appointmentDate": "2024-01-16",
+                  "timeSlot": "Morning (8-12)"
+                },
+                "onSiteContact": {
+                  "fullName": "Jane Smith",
+                  "email": "jane.smith@email.com",
+                  "mobileNumber": "+1-555-987-6543"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          },
+          "400": {
+            "description": "Invalid event data"
+          }
+        }
+      }
+    },
+    "/events/service-ticket-resolved": {
+      "post": {
+        "summary": "Service Ticket Resolved Event",
+        "description": "Publishes a service ticket resolution event to Kafka topic: service-ticket-resolved",
+        "tags": ["Service Ticket Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTicketResolvedEvent"
+              },
+              "example": {
+                "ticketId": "550e8400-e29b-41d4-a716-446655440000",
+                "resolutionTimestamp": "2024-01-16T14:30:00Z",
+                "resolvedBy": "Field Technician Mike Johnson",
+                "resolutionCode": "Replaced Equipment",
+                "resolutionNotes": {
+                  "timestamp": "2024-01-16T14:30:00Z",
+                  "author": "Field Technician Mike Johnson",
+                  "note": "Replaced faulty modem. Customer now has full connectivity. Tested all services successfully."
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          },
+          "400": {
+            "description": "Invalid event data"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Service Ticket Events",
+      "description": "Events related to service ticket lifecycle management and troubleshooting"
+    }
+  ]
+}
