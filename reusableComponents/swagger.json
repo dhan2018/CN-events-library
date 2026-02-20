@@ -1,0 +1,133 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ISP Order Event Schemas",
+    "description": "Event schemas for order lifecycle management in a Kafka-based event-driven system for ISP services",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "CustomerDetails": {
+        "type": "object",
+        "description": "Customer information",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the customer details record"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "The customer's full legal name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The customer's primary email address"
+          },
+          "mobileNumber": {
+            "type": "string",
+            "description": "The customer's mobile phone number"
+          }
+        },
+        "required": ["id","orgId", "fullName", "email", "mobileNumber"]
+      },
+      "Address": {
+        "type": "object",
+        "description": "Physical address information",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the address record"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "street": {
+            "type": "string",
+            "description": "Street name and number"
+          },
+          "city": {
+            "type": "string",
+            "description": "City name"
+          },
+          "state": {
+            "type": "string",
+            "description": "State or province"
+          },
+          "zipCode": {
+            "type": "string",
+            "description": "Postal or ZIP code"
+          }
+        },
+        "required": ["id","orgId", "street", "city", "state", "zipCode"]
+      },
+      "billingAddress": {
+        "type": "object",
+        "description": "Physical address information",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the billing address record"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "street": {
+            "type": "string",
+            "description": "Street name and number"
+          },
+          "city": {
+            "type": "string",
+            "description": "City name"
+          },
+          "state": {
+            "type": "string",
+            "description": "State or province"
+          },
+          "zipCode": {
+            "type": "string",
+            "description": "Postal or ZIP code"
+          }
+        },
+        "required": ["id","orgId", "street", "city", "state", "zipCode"]
+      },
+      "Appointment": {
+        "type": "object",
+        "description": "Appointment scheduling details",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the appointment record"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "preferredDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The customer's preferred date for installation or service"
+          },
+          "timeSlot": {
+            "type": "string",
+            "enum": ["Morning (8-12)", "Afternoon (1-5)", "Anytime"],
+            "description": "The customer's preferred time window"
+          }
+        },
+        "required": ["id","orgId", "preferredDate", "timeSlot"]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "reusableComponents",
+      "description": "Commonly used components for event schemas"
+    }
+  ]
+}

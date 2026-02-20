@@ -7,66 +7,14 @@
   },
   "components": {
     "schemas": {
-      "ContactInfo": {
-        "type": "object",
-        "description": "Standard contact information for a person",
-        "properties": {
-          "fullName": {
-            "type": "string",
-            "description": "The person's full name"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "description": "The person's email address"
-          },
-          "mobileNumber": {
-            "type": "string",
-            "description": "The person's mobile phone number"
-          }
-        },
-        "required": ["fullName", "mobileNumber"]
-      },
-      "Address": {
-        "type": "object",
-        "description": "A physical service or mailing address",
-        "properties": {
-          "street": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
-          },
-          "state": {
-            "type": "string"
-          },
-          "zipCode": {
-            "type": "string"
-          }
-        },
-        "required": ["street", "city", "state", "zipCode"]
-      },
-      "Appointment": {
-        "type": "object",
-        "description": "Details for a scheduled technician visit",
-        "properties": {
-          "appointmentDate": {
-            "type": "string",
-            "format": "date",
-            "description": "The confirmed date for the technician visit"
-          },
-          "timeSlot": {
-            "type": "string",
-            "enum": ["Morning (8-12)", "Afternoon (1-5)"],
-            "description": "The confirmed time window for the visit"
-          }
-        },
-        "required": ["appointmentDate", "timeSlot"]
-      },
       "TicketLogEntry": {
         "type": "object",
         "description": "An entry in the ticket's history log",
         "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
           "timestamp": {
             "type": "string",
             "format": "date-time"
@@ -80,26 +28,26 @@
             "description": "The content of the log entry or note"
           }
         },
-        "required": ["timestamp", "author", "note"]
+        "required": ["orgId", "timestamp", "author", "note"]
       },
       "ServiceTicketCreatedEvent": {
         "type": "object",
         "description": "Event fired when a customer reports a new service issue",
         "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
           "ticketId": {
             "type": "string",
             "format": "uuid",
             "description": "A unique identifier for this service ticket"
           },
-          "customerId": {
-            "type": "string",
-            "description": "The unique identifier for the customer account"
+          "CustomerDetails": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
           },
-          "customerContact": {
-            "$ref": "#/components/schemas/ContactInfo"
-          },
-          "serviceAddress": {
-            "$ref": "#/components/schemas/Address"
+          "Address": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
           },
           "problemDescription": {
             "type": "string",
@@ -122,10 +70,11 @@
           }
         },
         "required": [
+          "orgId",
           "ticketId",
           "customerId",
-          "customerContact",
-          "serviceAddress",
+          "CustomerDetails",
+          "Address",
           "problemDescription",
           "serviceType"
         ]
@@ -134,6 +83,10 @@
         "type": "object",
         "description": "Event fired when ticket is updated with new information or status change",
         "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
           "ticketId": {
             "type": "string",
             "format": "uuid",
@@ -148,12 +101,16 @@
             "$ref": "#/components/schemas/TicketLogEntry"
           }
         },
-        "required": ["ticketId"]
+        "required": ["orgId", "ticketId"]
       },
       "ServiceTicketDispatchScheduledEvent": {
         "type": "object",
         "description": "Event fired when a technician visit is scheduled for a ticket",
         "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
           "ticketId": {
             "type": "string",
             "format": "uuid",
@@ -163,26 +120,23 @@
             "type": "string",
             "description": "The ID of the assigned field technician"
           },
-          "appointmentDetails": {
-            "$ref": "#/components/schemas/Appointment"
+          "Appointment": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Appointment"
           },
-          "onSiteContact": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ContactInfo"
-              },
-              {
-                "description": "Contact info for the person the technician should call upon arrival (e.g., a spouse or family member)"
-              }
-            ]
+          "CustomerDetails": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
           }
         },
-        "required": ["ticketId", "technicianId", "appointmentDetails", "onSiteContact"]
+        "required": ["orgId", "ticketId", "technicianId", "appointmentDetails", "CustomerDetails"]
       },
       "ServiceTicketResolvedEvent": {
         "type": "object",
         "description": "Event fired when a technician has completed work and resolved the issue",
         "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
           "ticketId": {
             "type": "string",
             "format": "uuid",
@@ -205,7 +159,7 @@
             "$ref": "#/components/schemas/TicketLogEntry"
           }
         },
-        "required": ["ticketId", "resolutionTimestamp", "resolvedBy", "resolutionCode", "resolutionNotes"]
+        "required": ["orgId", "ticketId", "resolutionTimestamp", "resolvedBy", "resolutionCode", "resolutionNotes"]
       }
     }
   },
@@ -215,6 +169,8 @@
         "summary": "Service Ticket Created Event",
         "description": "Publishes a service ticket creation event to Kafka topic: service-ticket-created",
         "tags": ["Service Ticket Events"],
+        "intent": "Service Ticket Management",
+        "sub_intent": "Create Service Ticket",
         "requestBody": {
           "required": true,
           "content": {
@@ -222,19 +178,24 @@
               "schema": {
                 "$ref": "#/components/schemas/ServiceTicketCreatedEvent"
               },
-              "example": {
+              "sample_event": {
+                "orgId": "ORG-001",
                 "ticketId": "550e8400-e29b-41d4-a716-446655440000",
                 "customerId": "CUST-12345",
-                "customerContact": {
+                "CustomerDetails": {
+                  "id": "CUSTDET-001",
+                  "orgId": "ORG-001",
                   "fullName": "John Smith",
                   "email": "john.smith@email.com",
                   "mobileNumber": "+1-555-123-4567"
                 },
-                "serviceAddress": {
-                  "street": "123 Main St",
-                  "city": "Springfield",
-                  "state": "IL",
-                  "zipCode": "62701"
+                "Address": {
+                   "id": "ADDR-001",
+                   "orgId": "ORG-001",
+                   "street": "123 Main St",
+                   "city": "Springfield",
+                   "state": "IL",
+                   "zipCode": "62701"
                 },
                 "problemDescription": "Internet connection has been intermittent for the past 2 days",
                 "serviceType": "Data",
@@ -259,6 +220,8 @@
         "summary": "Service Ticket Updated Event",
         "description": "Publishes a service ticket update event to Kafka topic: service-ticket-updated",
         "tags": ["Service Ticket Events"],
+        "intent": "Service Ticket Management",
+        "sub_intent": "Update Ticket Status",
         "requestBody": {
           "required": true,
           "content": {
@@ -266,10 +229,12 @@
               "schema": {
                 "$ref": "#/components/schemas/ServiceTicketUpdatedEvent"
               },
-              "example": {
+              "sample_event": {
+                "orgId": "ORG-001",
                 "ticketId": "550e8400-e29b-41d4-a716-446655440000",
                 "newStatus": "Diagnosing",
                 "logEntry": {
+                   "orgId": "ORG-001",
                   "timestamp": "2024-01-15T11:15:00Z",
                   "author": "Tech Support Agent",
                   "note": "Ran remote diagnostics - detected signal strength issues"
@@ -293,6 +258,8 @@
         "summary": "Service Ticket Dispatch Scheduled Event",
         "description": "Publishes a technician dispatch scheduling event to Kafka topic: service-ticket-dispatch-scheduled",
         "tags": ["Service Ticket Events"],
+        "intent": "Service Ticket Management",
+        "sub_intent": "Schedule Technician Dispatch",
         "requestBody": {
           "required": true,
           "content": {
@@ -300,14 +267,19 @@
               "schema": {
                 "$ref": "#/components/schemas/ServiceTicketDispatchScheduledEvent"
               },
-              "example": {
+              "sample_event": {
+                "orgId": "ORG-001",
                 "ticketId": "550e8400-e29b-41d4-a716-446655440000",
                 "technicianId": "TECH-789",
-                "appointmentDetails": {
-                  "appointmentDate": "2024-01-16",
+                "Appointment": {
+                   "id": "APPT-001",
+                   "orgId": "ORG-001",
+                  "preferredDate": "2024-01-16",
                   "timeSlot": "Morning (8-12)"
                 },
-                "onSiteContact": {
+                "CustomerDetails": {
+                    "id": "CUSTDET-001",
+                    "orgId": "ORG-001",
                   "fullName": "Jane Smith",
                   "email": "jane.smith@email.com",
                   "mobileNumber": "+1-555-987-6543"
@@ -331,6 +303,8 @@
         "summary": "Service Ticket Resolved Event",
         "description": "Publishes a service ticket resolution event to Kafka topic: service-ticket-resolved",
         "tags": ["Service Ticket Events"],
+        "intent": "Service Ticket Management",
+        "sub_intent": "Resolve Service Ticket",
         "requestBody": {
           "required": true,
           "content": {
@@ -338,12 +312,14 @@
               "schema": {
                 "$ref": "#/components/schemas/ServiceTicketResolvedEvent"
               },
-              "example": {
+              "sample_event": {
+                "orgId": "ORG-001",
                 "ticketId": "550e8400-e29b-41d4-a716-446655440000",
                 "resolutionTimestamp": "2024-01-16T14:30:00Z",
                 "resolvedBy": "Field Technician Mike Johnson",
                 "resolutionCode": "Replaced Equipment",
                 "resolutionNotes": {
+                  "orgId": "ORG-001",
                   "timestamp": "2024-01-16T14:30:00Z",
                   "author": "Field Technician Mike Johnson",
                   "note": "Replaced faulty modem. Customer now has full connectivity. Tested all services successfully."

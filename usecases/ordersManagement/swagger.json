@@ -1,0 +1,551 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Order Management Events API",
+    "description": "Event schemas for order lifecycle management in a Kafka-based event-driven system for ISP services",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "Price": {
+        "type": "object",
+        "description": "Price information",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "amount": {
+            "type": "number",
+            "description": "The numeric value of the price"
+          },
+            "currency": {
+              "type": "string",
+              "default": "USD",
+              "description": "The currency code (e.g., USD)"
+            }
+        },
+        "required": ["orgId", "amount", "currency"]
+      },
+      "OrderLineItem": {
+        "type": "object",
+        "description": "Individual line item in an order",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "itemId": {
+            "type": "string",
+            "description": "A unique identifier for this line item"
+          },
+          "productType": {
+            "type": "string",
+            "enum": ["Data", "Voice", "Video", "AddOn"],
+            "description": "The category of the product"
+          },
+          "productName": {
+            "type": "string",
+            "description": "The commercial name of the product (e.g., 'Fiber Internet 1 Gig')"
+          },
+          "monthlyPrice": {
+            "$ref": "#/components/schemas/Price"
+          },
+          "oneTimePrice": {
+            "$ref": "#/components/schemas/Price"
+          }
+        },
+        "required": ["orgId", "itemId", "productType", "productName"]
+      },
+      "OrderCreatedEvent": {
+        "type": "object",
+        "description": "Event fired when a customer submits a new order for activation",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this order"
+          },
+          "orderCreatedTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the order was created"
+          },
+          "CustomerDetails": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
+          },
+          "Address": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
+          },
+          "billingAddress": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/billingAddress"
+          },
+          "Appointment": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Appointment"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          },
+          "totalMonthlyPrice": {
+            "$ref": "#/components/schemas/Price"
+          },
+          "totalOneTimePrice": {
+            "$ref": "#/components/schemas/Price"
+          }
+        },
+        "required": [
+          "orgId",
+          "orderId",
+          "orderCreatedTimestamp",
+          "CustomerDetails",
+          "Address",
+          "billingAddress",
+          "Appointment",
+          "lineItems"
+        ]
+      },
+      "OrderSavedEvent": {
+        "type": "object",
+        "description": "Event fired when a customer saves a draft order without submitting",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this draft order"
+          },
+          "CustomerDetails": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
+          },
+          "Address": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
+          },
+          "billingAddress": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/billingAddress"
+          },
+          "Appointment": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Appointment"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          }
+        },
+        "required": ["orgId", "orderId", "CustomerDetails", "Address"]
+      },
+      "OrderConfirmedEvent": {
+        "type": "object",
+        "description": "Event fired when order is validated and accepted for fulfillment",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the order being confirmed"
+          },
+          "confirmationTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the order was confirmed"
+          },
+          "status": {
+            "type": "string",
+            "default": "Confirmed",
+            "description": "The new status of the order"
+          }
+        },
+        "required": ["orgId", "orderId", "confirmationTimestamp"]
+      },
+      "OrderUpdatedEvent": {
+        "type": "object",
+        "description": "Event fired when an existing unfulfilled order is modified",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the order being updated"
+          },
+          "updatedTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp of the update"
+          },
+          "CustomerDetails": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
+          },
+          "Address": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
+          },
+          "billingAddress": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/billingAddress"
+          },
+          "Appointment": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Appointment"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          }
+        },
+        "required": ["orgId", "orderId", "updatedTimestamp"]
+      },
+      "OrderCancelledEvent": {
+        "type": "object",
+        "description": "Event fired when an order is cancelled before fulfillment",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the order being cancelled"
+          },
+          "cancellationTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the order was cancelled"
+          },
+          "reason": {
+            "type": "string",
+            "description": "The reason for the cancellation"
+          }
+        },
+        "required": ["orgId", "orderId", "cancellationTimestamp", "reason"]
+      }
+    }
+  },
+  "paths": {
+    "/events/order-created": {
+      "post": {
+        "summary": "Order Created Event",
+        "description": "Publishes an order creation event to Kafka topic: order-created",
+        "tags": ["Order Events"],
+        "intent": "Order Management",
+        "sub_intent": "Create New Order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreatedEvent"
+              },
+              "sample_event": {
+                "orgId": "ORG-001",
+                "orderId": "550e8400-e29b-41d4-a716-446655440000",
+                "orderCreatedTimestamp": "2024-01-15T10:30:00Z",
+                "CustomerDetails": {
+                  "id": "CUSTDET-001",
+                  "orgId": "ORG-001",
+                  "fullName": "John Smith",
+                  "email": "john.smith@email.com",
+                  "mobileNumber": "+1-555-123-4567"
+                },
+                "Address": {
+                  "id": "ADDR-001",
+                  "orgId": "ORG-001",
+                  "street": "123 Main St",
+                  "city": "Springfield",
+                  "state": "IL",
+                  "zipCode": "62701"
+                },
+                "billingAddress": {
+                  "id": "BILLADDR-001",
+                  "orgId": "ORG-001",
+                  "street": "123 Main St",
+                  "city": "Springfield",
+                  "state": "IL",
+                  "zipCode": "62701"
+                },
+                "Appointment": {
+                  "id": "APPT-001",
+                  "orgId": "ORG-001",
+                  "preferredDate": "2024-01-20",
+                  "timeSlot": "Morning (8-12)"
+                },
+                "lineItems": [
+                  {
+                    "orgId": "ORG-001",
+                    "itemId": "ITEM-001",
+                    "productType": "Data",
+                    "productName": "Fiber Internet 1 Gig",
+                    "monthlyPrice": {
+                      "orgId": "ORG-001",
+                      "amount": 79.99,
+                      "currency": "USD"
+                    },
+                    "oneTimePrice": {
+                      "orgId": "ORG-001",
+                      "amount": 99.99,
+                      "currency": "USD"
+                    }
+                  }
+                ],
+                "totalMonthlyPrice": {
+                  "orgId": "ORG-001",
+                  "amount": 79.99,
+                  "currency": "USD"
+                },
+                "totalOneTimePrice": {
+                  "orgId": "ORG-001",
+                  "amount": 99.99,
+                  "currency": "USD"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-saved": {
+      "post": {
+        "summary": "Order Saved Event",
+        "description": "Publishes an order save event to Kafka topic: order-saved",
+        "tags": ["Order Events"],
+        "intent": "Order Management",
+        "sub_intent": "Save Draft Order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderSavedEvent"
+              },
+              "sample_event": {
+                "orgId": "ORG-001",
+                "orderId": "650e8400-e29b-41d4-a716-446655440001",
+                "CustomerDetails": {
+                  "id": "CUSTDET-002",
+                  "orgId": "ORG-001",
+                  "fullName": "Jane Doe",
+                  "email": "jane.doe@email.com",
+                  "mobileNumber": "+1-555-987-6543"
+                },
+                "Address": {
+                  "id": "ADDR-002",
+                  "orgId": "ORG-001",
+                  "street": "456 Oak Ave",
+                  "city": "Chicago",
+                  "state": "IL",
+                  "zipCode": "60601"
+                },
+                "billingAddress": {
+                  "id": "BILLADDR-002",
+                  "orgId": "ORG-001",
+                  "street": "456 Oak Ave",
+                  "city": "Chicago",
+                  "state": "IL",
+                  "zipCode": "60601"
+                },
+                "Appointment": {
+                  "id": "APPT-002",
+                  "orgId": "ORG-001",
+                  "preferredDate": "2024-01-25",
+                  "timeSlot": "Afternoon (1-5)"
+                },
+                "lineItems": [
+                  {
+                    "orgId": "ORG-001",
+                    "itemId": "ITEM-002",
+                    "productType": "Voice",
+                    "productName": "Home Phone Service",
+                    "monthlyPrice": {
+                      "orgId": "ORG-001",
+                      "amount": 29.99,
+                      "currency": "USD"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-confirmed": {
+      "post": {
+        "summary": "Order Confirmed Event",
+        "description": "Publishes an order confirmation event to Kafka topic: order-confirmed",
+        "tags": ["Order Events"],
+        "intent": "Order Management",
+        "sub_intent": "Confirm Order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderConfirmedEvent"
+              },
+              "sample_event": {
+                "orgId": "ORG-001",
+                "orderId": "550e8400-e29b-41d4-a716-446655440000",
+                "confirmationTimestamp": "2024-01-15T11:00:00Z",
+                "status": "Confirmed"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-updated": {
+      "post": {
+        "summary": "Order Updated Event",
+        "description": "Publishes an order update event to Kafka topic: order-updated",
+        "tags": ["Order Events"],
+        "intent": "Order Management",
+        "sub_intent": "Update Order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderUpdatedEvent"
+              },
+              "sample_event": {
+                "orgId": "ORG-001",
+                "orderId": "550e8400-e29b-41d4-a716-446655440000",
+                "updatedTimestamp": "2024-01-15T12:00:00Z",
+                "CustomerDetails": {
+                  "id": "CUSTDET-001",
+                  "orgId": "ORG-001",
+                  "fullName": "John Smith",
+                  "email": "john.smith.new@email.com",
+                  "mobileNumber": "+1-555-123-4567"
+                },
+                "Address": {
+                  "id": "ADDR-001",
+                  "orgId": "ORG-001",
+                  "street": "123 Main St Apt 5",
+                  "city": "Springfield",
+                  "state": "IL",
+                  "zipCode": "62701"
+                },
+                "billingAddress": {
+                  "id": "BILLADDR-001",
+                  "orgId": "ORG-001",
+                  "street": "123 Main St Apt 5",
+                  "city": "Springfield",
+                  "state": "IL",
+                  "zipCode": "62701"
+                },
+                "Appointment": {
+                  "id": "APPT-001",
+                  "orgId": "ORG-001",
+                  "preferredDate": "2024-01-22",
+                  "timeSlot": "Afternoon (1-5)"
+                },
+                "lineItems": [
+                  {
+                    "orgId": "ORG-001",
+                    "itemId": "ITEM-001",
+                    "productType": "Data",
+                    "productName": "Fiber Internet 1 Gig",
+                    "monthlyPrice": {
+                      "orgId": "ORG-001",
+                      "amount": 79.99,
+                      "currency": "USD"
+                    },
+                    "oneTimePrice": {
+                      "orgId": "ORG-001",
+                      "amount": 99.99,
+                      "currency": "USD"
+                    }
+                  },
+                  {
+                    "orgId": "ORG-001",
+                    "itemId": "ITEM-003",
+                    "productType": "AddOn",
+                    "productName": "Wi-Fi Router",
+                    "monthlyPrice": {
+                      "orgId": "ORG-001",
+                      "amount": 10.00,
+                      "currency": "USD"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-cancelled": {
+      "post": {
+        "summary": "Order Cancelled Event",
+        "description": "Publishes an order cancellation event to Kafka topic: order-cancelled",
+        "tags": ["Order Events"],
+        "intent": "Order Management",
+        "sub_intent": "Cancel Order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCancelledEvent"
+              },
+              "sample_event": {
+                "orgId": "ORG-001",
+                "orderId": "650e8400-e29b-41d4-a716-446655440001",
+                "cancellationTimestamp": "2024-01-16T09:00:00Z",
+                "reason": "Customer requested cancellation due to change of address"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Order Events",
+      "description": "Events related to order lifecycle management"
+    }
+  ]
+}
