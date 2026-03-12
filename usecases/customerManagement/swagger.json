@@ -1,0 +1,467 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Customer Management Events API",
+    "description": "Event schemas for customer lifecycle management in a Kafka-based event-driven ISP system",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+
+      "CustomerCreatedEvent": {
+        "type": "object",
+        "description": "Event fired when a new customer profile is created",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": ["CUSTOMER_CREATED"],
+            "default": "CUSTOMER_CREATED"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "mobileNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Pending", "Suspended", "Closed"],
+            "default": "Active"
+          }
+        },
+        "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
+          "orgId",
+          "customerId",
+          "fullName"
+        ]
+      },
+
+      "CustomerVerifiedEvent": {
+        "type": "object",
+        "description": "Event fired when a customer's identity verification is completed",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": ["CUSTOMER_VERIFIED"],
+            "default": "CUSTOMER_VERIFIED"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "verificationMethod": {
+            "type": "string",
+            "description": "KYC verification method (ID, Passport, etc)"
+          },
+          "verifiedBy": {
+            "type": "string",
+            "description": "Agent or system performing verification"
+          }
+        },
+        "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
+          "orgId",
+          "customerId"
+        ]
+      },
+
+      "CustomerProfileUpdatedEvent": {
+        "type": "object",
+        "description": "Event fired when customer profile details are updated",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": ["CUSTOMER_PROFILE_UPDATED"],
+            "default": "CUSTOMER_PROFILE_UPDATED"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "updatedFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields updated in the customer profile"
+          }
+        },
+        "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
+          "orgId",
+          "customerId"
+        ]
+      },
+
+      "CustomerSuspendedEvent": {
+        "type": "object",
+        "description": "Event fired when a customer account is suspended",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": ["CUSTOMER_SUSPENDED"],
+            "default": "CUSTOMER_SUSPENDED"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "suspendedBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
+          "orgId",
+          "customerId"
+        ]
+      },
+
+      "CustomerReactivatedEvent": {
+        "type": "object",
+        "description": "Event fired when a suspended customer account is reactivated",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": ["CUSTOMER_REACTIVATED"],
+            "default": "CUSTOMER_REACTIVATED"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "reactivatedBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
+          "orgId",
+          "customerId"
+        ]
+      },
+
+      "CustomerDeactivatedEvent": {
+        "type": "object",
+        "description": "Event fired when a customer account is permanently closed",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": ["CUSTOMER_DEACTIVATED"],
+            "default": "CUSTOMER_DEACTIVATED"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
+          "orgId",
+          "customerId"
+        ]
+      }
+
+    }
+  },
+
+  "paths": {
+
+    "/events/customer-created": {
+      "post": {
+        "summary": "Customer Created Event",
+        "description": "Publishes a customer creation event to Kafka topic: customer-created",
+        "tags": ["Customer Events"],
+        "intent": "Customer Management",
+        "sub_intent": "Create Customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerCreatedEvent"
+              },
+              "example": {
+                "eventId": "a1b2c3d4-1111-4abc-8def-111122223333",
+                "eventType": "CUSTOMER_CREATED",
+                "eventTimestamp": "2025-03-12T08:00:00Z",
+                "orgId": "cn-isp-001",
+                "customerId": "CUST-00094821",
+                "fullName": "John Hartley",
+                "email": "john.hartley@email.com.au",
+                "mobileNumber": "+61412345678",
+                "status": "Active"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/customer-verified": {
+      "post": {
+        "summary": "Customer Verified Event",
+        "description": "Publishes a customer identity verification event to Kafka topic: customer-verified",
+        "tags": ["Customer Events"],
+        "intent": "Customer Management",
+        "sub_intent": "Verify Customer Identity",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerVerifiedEvent"
+              },
+              "example": {
+                "eventId": "b2c3d4e5-2222-4bcd-9ef0-222233334444",
+                "eventType": "CUSTOMER_VERIFIED",
+                "eventTimestamp": "2025-03-12T08:15:00Z",
+                "orgId": "cn-isp-001",
+                "customerId": "CUST-00094821",
+                "verificationMethod": "Passport",
+                "verifiedBy": "AGENT-KYC-07"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/customer-updated": {
+      "post": {
+        "summary": "Customer Profile Updated Event",
+        "description": "Publishes a customer profile update event to Kafka topic: customer-updated",
+        "tags": ["Customer Events"],
+        "intent": "Customer Management",
+        "sub_intent": "Update Customer Profile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerProfileUpdatedEvent"
+              },
+              "example": {
+                "eventId": "c3d4e5f6-3333-4cde-af01-333344445555",
+                "eventType": "CUSTOMER_PROFILE_UPDATED",
+                "eventTimestamp": "2025-03-12T09:30:00Z",
+                "orgId": "cn-isp-001",
+                "customerId": "CUST-00094821",
+                "updatedFields": ["email", "mobileNumber"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/customer-suspended": {
+      "post": {
+        "summary": "Customer Suspended Event",
+        "description": "Publishes a customer suspension event to Kafka topic: customer-suspended",
+        "tags": ["Customer Events"],
+        "intent": "Customer Management",
+        "sub_intent": "Suspend Customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerSuspendedEvent"
+              },
+              "example": {
+                "eventId": "d4e5f6a7-4444-4def-b012-444455556666",
+                "eventType": "CUSTOMER_SUSPENDED",
+                "eventTimestamp": "2025-03-12T11:00:00Z",
+                "orgId": "cn-isp-001",
+                "customerId": "CUST-00094821",
+                "reason": "Non-payment of overdue balance",
+                "suspendedBy": "BILLING-SYSTEM"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/customer-reactivated": {
+      "post": {
+        "summary": "Customer Reactivated Event",
+        "description": "Publishes a customer reactivation event to Kafka topic: customer-reactivated",
+        "tags": ["Customer Events"],
+        "intent": "Customer Management",
+        "sub_intent": "Reactivate Customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerReactivatedEvent"
+              },
+              "example": {
+                "eventId": "e5f6a7b8-5555-4ef0-c123-555566667777",
+                "eventType": "CUSTOMER_REACTIVATED",
+                "eventTimestamp": "2025-03-12T14:00:00Z",
+                "orgId": "cn-isp-001",
+                "customerId": "CUST-00094821",
+                "reactivatedBy": "AGENT-BILLING-12"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/customer-deactivated": {
+      "post": {
+        "summary": "Customer Deactivated Event",
+        "description": "Publishes a customer deactivation event to Kafka topic: customer-deactivated",
+        "tags": ["Customer Events"],
+        "intent": "Customer Management",
+        "sub_intent": "Deactivate Customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerDeactivatedEvent"
+              },
+              "example": {
+                "eventId": "f6a7b8c9-6666-4f01-d234-666677778888",
+                "eventType": "CUSTOMER_DEACTIVATED",
+                "eventTimestamp": "2025-03-12T16:45:00Z",
+                "orgId": "cn-isp-001",
+                "customerId": "CUST-00094821",
+                "reason": "Customer requested account closure"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    }
+
+  },
+
+  "tags": [
+    {
+      "name": "Customer Events",
+      "description": "Events related to customer lifecycle management"
+    }
+  ]
+}
