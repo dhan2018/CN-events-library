@@ -1,0 +1,353 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Outage Management Events API",
+    "description": "Event schemas for network outage lifecycle management in a Kafka-based event-driven ISP system",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+
+      "AffectedService": {
+        "type": "object",
+        "description": "Represents a service impacted by the outage",
+        "properties": {
+          "serviceType": {
+            "type": "string",
+            "enum": ["Data", "Voice", "Video"]
+          },
+          "affectedCustomerCount": {
+            "type": "integer",
+            "description": "Number of customers impacted"
+          }
+        },
+        "required": ["serviceType"]
+      },
+
+      "OutageDetectedEvent": {
+        "type": "object",
+        "description": "Event fired when a potential outage is detected by monitoring systems",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": ["OUTAGE_DETECTED"],
+            "default": "OUTAGE_DETECTED"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "outageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "networkElementId": {
+            "type": "string",
+            "description": "Identifier of affected node/router"
+          },
+          "region": {
+            "type": "string"
+          },
+          "detectedBy": {
+            "type": "string",
+            "description": "System detecting the outage (e.g., NMS)"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
+          "orgId",
+          "outageId"
+        ]
+      },
+
+      "OutageConfirmedEvent": {
+        "type": "object",
+        "description": "Event fired when outage is confirmed by NOC",
+        "properties": {
+          "eventId": { "type": "string", "format": "uuid" },
+          "eventType": { "type": "string", "enum": ["OUTAGE_CONFIRMED"], "default": "OUTAGE_CONFIRMED" },
+          "eventTimestamp": { "type": "string", "format": "date-time" },
+          "orgId": { "type": "string" },
+          "outageId": { "type": "string", "format": "uuid" },
+          "confirmedBy": {
+            "type": "string",
+            "description": "Operator or system confirming the outage"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["Critical", "Major", "Minor"]
+          }
+        },
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "outageId"]
+      },
+
+      "OutageImpactAssessedEvent": {
+        "type": "object",
+        "description": "Event fired when impact of outage is calculated",
+        "properties": {
+          "eventId": { "type": "string", "format": "uuid" },
+          "eventType": { "type": "string", "enum": ["OUTAGE_IMPACT_ASSESSED"], "default": "OUTAGE_IMPACT_ASSESSED" },
+          "eventTimestamp": { "type": "string", "format": "date-time" },
+          "orgId": { "type": "string" },
+          "outageId": { "type": "string", "format": "uuid" },
+          "affectedServices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffectedService"
+            }
+          },
+          "estimatedCustomersImpacted": {
+            "type": "integer"
+          }
+        },
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "outageId"]
+      },
+
+      "OutageMitigationStartedEvent": {
+        "type": "object",
+        "description": "Event fired when repair work begins",
+        "properties": {
+          "eventId": { "type": "string", "format": "uuid" },
+          "eventType": { "type": "string", "enum": ["OUTAGE_MITIGATION_STARTED"], "default": "OUTAGE_MITIGATION_STARTED" },
+          "eventTimestamp": { "type": "string", "format": "date-time" },
+          "orgId": { "type": "string" },
+          "outageId": { "type": "string", "format": "uuid" },
+          "assignedTeam": {
+            "type": "string",
+            "description": "Network operations team handling the outage"
+          },
+          "actionPlan": {
+            "type": "string"
+          }
+        },
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "outageId"]
+      },
+
+      "OutageResolvedEvent": {
+        "type": "object",
+        "description": "Event fired when outage has been resolved",
+        "properties": {
+          "eventId": { "type": "string", "format": "uuid" },
+          "eventType": { "type": "string", "enum": ["OUTAGE_RESOLVED"], "default": "OUTAGE_RESOLVED" },
+          "eventTimestamp": { "type": "string", "format": "date-time" },
+          "orgId": { "type": "string" },
+          "outageId": { "type": "string", "format": "uuid" },
+          "resolutionTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolutionSummary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
+          "orgId",
+          "outageId",
+          "resolutionTimestamp"
+        ]
+      }
+
+    }
+  },
+
+  "paths": {
+
+    "/events/outage-detected": {
+      "post": {
+        "summary": "Outage Detected Event",
+        "description": "Publishes outage detection event to Kafka topic: outage-detected",
+        "tags": ["Outage Events"],
+        "intent": "Outage Management",
+        "sub_intent": "Detect Outage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutageDetectedEvent"
+              },
+              "example": {
+                "eventId": "f3a1c2d4-8b5e-4f7a-9c6d-1e2b3a4c5d6e",
+                "eventType": "OUTAGE_DETECTED",
+                "eventTimestamp": "2025-03-12T02:15:00Z",
+                "orgId": "cn-isp-001",
+                "outageId": "a1b2c3d4-1234-5678-abcd-ef0123456789",
+                "networkElementId": "RTR-SYDNEY-CORE-01",
+                "region": "NSW-SYDNEY",
+                "detectedBy": "NMS-ZABBIX",
+                "description": "High packet loss detected on core router uplink"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/outage-confirmed": {
+      "post": {
+        "summary": "Outage Confirmed Event",
+        "description": "Publishes outage confirmation event to Kafka topic: outage-confirmed",
+        "tags": ["Outage Events"],
+        "intent": "Outage Management",
+        "sub_intent": "Confirm Outage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutageConfirmedEvent"
+              },
+              "example": {
+                "eventId": "b2c3d4e5-9c6d-4f7a-8b5e-2f3a4b5c6d7e",
+                "eventType": "OUTAGE_CONFIRMED",
+                "eventTimestamp": "2025-03-12T02:22:00Z",
+                "orgId": "cn-isp-001",
+                "outageId": "a1b2c3d4-1234-5678-abcd-ef0123456789",
+                "confirmedBy": "NOC-OPERATOR-42",
+                "severity": "Major"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/outage-impact-assessed": {
+      "post": {
+        "summary": "Outage Impact Assessed Event",
+        "description": "Publishes outage impact assessment event to Kafka topic: outage-impact-assessed",
+        "tags": ["Outage Events"],
+        "intent": "Outage Management",
+        "sub_intent": "Assess Impact",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutageImpactAssessedEvent"
+              },
+              "example": {
+                "eventId": "c3d4e5f6-1a2b-4c3d-9e8f-3a4b5c6d7e8f",
+                "eventType": "OUTAGE_IMPACT_ASSESSED",
+                "eventTimestamp": "2025-03-12T02:30:00Z",
+                "orgId": "cn-isp-001",
+                "outageId": "a1b2c3d4-1234-5678-abcd-ef0123456789",
+                "affectedServices": [
+                  { "serviceType": "Data", "affectedCustomerCount": 1240 },
+                  { "serviceType": "Voice", "affectedCustomerCount": 380 }
+                ],
+                "estimatedCustomersImpacted": 1620
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/outage-mitigation-started": {
+      "post": {
+        "summary": "Outage Mitigation Started Event",
+        "description": "Publishes outage mitigation start event to Kafka topic: outage-mitigation-started",
+        "tags": ["Outage Events"],
+        "intent": "Outage Management",
+        "sub_intent": "Start Mitigation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutageMitigationStartedEvent"
+              },
+              "example": {
+                "eventId": "d4e5f6a7-2b3c-4d5e-af9b-4b5c6d7e8f9a",
+                "eventType": "OUTAGE_MITIGATION_STARTED",
+                "eventTimestamp": "2025-03-12T02:45:00Z",
+                "orgId": "cn-isp-001",
+                "outageId": "a1b2c3d4-1234-5678-abcd-ef0123456789",
+                "assignedTeam": "NOC-FIELD-TEAM-SYDNEY",
+                "actionPlan": "Replace faulty SFP module on RTR-SYDNEY-CORE-01 uplink port GE0/0/1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+
+    "/events/outage-resolved": {
+      "post": {
+        "summary": "Outage Resolved Event",
+        "description": "Publishes outage resolution event to Kafka topic: outage-resolved",
+        "tags": ["Outage Events"],
+        "intent": "Outage Management",
+        "sub_intent": "Resolve Outage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutageResolvedEvent"
+              },
+              "example": {
+                "eventId": "e5f6a7b8-3c4d-4e5f-bf0c-5c6d7e8f9a0b",
+                "eventType": "OUTAGE_RESOLVED",
+                "eventTimestamp": "2025-03-12T04:10:00Z",
+                "orgId": "cn-isp-001",
+                "outageId": "a1b2c3d4-1234-5678-abcd-ef0123456789",
+                "resolutionTimestamp": "2025-03-12T04:08:00Z",
+                "resolutionSummary": "SFP module replaced on RTR-SYDNEY-CORE-01. All services restored. Root cause: hardware failure."
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    }
+
+  },
+
+  "tags": [
+    {
+      "name": "Outage Events",
+      "description": "Events related to network outage lifecycle"
+    }
+  ]
+}
