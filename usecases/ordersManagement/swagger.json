@@ -560,11 +560,27 @@
                       "amount": 99.99,
                       "currency": "USD"
                     }
+                  },
+                  {
+                    "orgId": "ORG-001",
+                    "itemId": "ITEM-002",
+                    "productType": "Voice",
+                    "productName": "Home Phone Service",
+                    "monthlyPrice": {
+                      "orgId": "ORG-001",
+                      "amount": 29.99,
+                      "currency": "USD"
+                    },
+                    "oneTimePrice": {
+                      "orgId": "ORG-001",
+                      "amount": 0.00,
+                      "currency": "USD"
+                    }
                   }
                 ],
                 "totalMonthlyPrice": {
                   "orgId": "ORG-001",
-                  "amount": 79.99,
+                  "amount": 109.98,
                   "currency": "USD"
                 },
                 "totalOneTimePrice": {
@@ -645,12 +661,12 @@
                 "lineItems": [
                   {
                     "orgId": "ORG-001",
-                    "itemId": "ITEM-002",
-                    "productType": "Voice",
-                    "productName": "Home Phone Service",
+                    "itemId": "ITEM-003",
+                    "productType": "Video",
+                    "productName": "Basic Cable TV",
                     "monthlyPrice": {
                       "orgId": "ORG-001",
-                      "amount": 29.99,
+                      "amount": 49.99,
                       "currency": "USD"
                     }
                   }
@@ -723,13 +739,13 @@
                 "orderId": "550e8400-e29b-41d4-a716-446655440000",
                 "orderStatus": "Confirmed",
                 "updatedTimestamp": "2024-01-15T12:00:00Z",
-                "updatedFields": ["CustomerDetails", "serviceAddress"],
+                "updatedFields": ["CustomerDetails", "serviceAddress", "billingAddress", "Appointment", "lineItems"],
                 "CustomerDetails": {
                   "id": "CUSTDET-001",
                   "orgId": "ORG-001",
                   "fullName": "John Smith",
-                  "email": "john.smith.new@email.com",
-                  "mobileNumber": "+1-555-123-4567"
+                  "email": "john.smith.updated@email.com",
+                  "mobileNumber": "+1-555-123-9999"
                 },
                 "Address": {
                   "id": "ADDR-001",
@@ -756,7 +772,7 @@
                   "zipCode": "62701"
                 },
                 "Appointment": {
-                  "id": "APPT-001",
+                  "id": "APPT-004",
                   "orgId": "ORG-001",
                   "preferredDate": "2024-01-22",
                   "timeSlot": "Afternoon (1-5)"
@@ -780,9 +796,9 @@
                   },
                   {
                     "orgId": "ORG-001",
-                    "itemId": "ITEM-003",
+                    "itemId": "ITEM-004",
                     "productType": "AddOn",
-                    "productName": "Wi-Fi Router",
+                    "productName": "Wi-Fi Router Rental",
                     "monthlyPrice": {
                       "orgId": "ORG-001",
                       "amount": 10.00,
@@ -827,7 +843,7 @@
                 "cancelledBy": "Customer",
                 "refundAmount": {
                   "orgId": "ORG-001",
-                  "amount": 99.99,
+                  "amount": 49.99,
                   "currency": "USD"
                 }
               }
@@ -869,12 +885,12 @@
                   "timeSlot": "Morning (8-12)"
                 },
                 "newAppointment": {
-                  "id": "APPT-003",
+                  "id": "APPT-005",
                   "orgId": "ORG-001",
-                  "preferredDate": "2024-01-25",
+                  "preferredDate": "2024-01-27",
                   "timeSlot": "Afternoon (1-5)"
                 },
-                "reason": "Customer requested change",
+                "reason": "Customer requested change due to scheduling conflict",
                 "rescheduledBy": "Customer"
               }
             }
@@ -904,14 +920,14 @@
               "sample_event": {
                 "eventId": "b50e8400-e29b-41d4-a716-446655440099",
                 "eventType": "ORDER_INSTALLED",
-                "eventTimestamp": "2024-01-20T16:45:00Z",
+                "eventTimestamp": "2024-01-27T16:45:00Z",
                 "orgId": "ORG-001",
                 "orderId": "550e8400-e29b-41d4-a716-446655440000",
                 "orderStatus": "Installed",
-                "installationCompletedAt": "2024-01-20T16:30:00Z",
+                "installationCompletedAt": "2024-01-27T16:30:00Z",
                 "technicianId": "TECH-5678",
-                "installationNotes": "Installation completed successfully. All equipment tested.",
-                "installationDurationMinutes": 120
+                "installationNotes": "Installation completed successfully. Fiber line connected, router configured, all services tested and verified.",
+                "installationDurationMinutes": 95
               }
             }
           }
