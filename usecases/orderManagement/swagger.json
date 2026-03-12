@@ -3,7 +3,7 @@
   "info": {
     "title": "Order Management Events API",
     "description": "Event schemas for order lifecycle management in a Kafka-based event-driven system for ISP services",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "components": {
     "schemas": {
@@ -19,11 +19,11 @@
             "type": "number",
             "description": "The numeric value of the price"
           },
-            "currency": {
-              "type": "string",
-              "default": "USD",
-              "description": "The currency code (e.g., USD)"
-            }
+          "currency": {
+            "type": "string",
+            "default": "USD",
+            "description": "The currency code (e.g., USD)"
+          }
         },
         "required": ["orgId", "amount", "currency"]
       },
@@ -61,6 +61,21 @@
         "type": "object",
         "description": "Event fired when a customer submits a new order for activation",
         "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this event"
+          },
+          "eventType": {
+            "type": "string",
+            "default": "ORDER_CREATED",
+            "description": "The type of the event"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event was emitted"
+          },
           "orgId": {
             "type": "string",
             "description": "Identifier of the organization/tenant"
@@ -69,6 +84,15 @@
             "type": "string",
             "format": "uuid",
             "description": "A unique identifier for this order"
+          },
+          "orderStatus": {
+            "type": "string",
+            "default": "New",
+            "description": "The current status of the order (e.g., New)"
+          },
+          "orderType": {
+            "type": "string",
+            "description": "The type of order (e.g., New, Transfer, Upgrade)"
           },
           "orderCreatedTimestamp": {
             "type": "string",
@@ -80,6 +104,10 @@
           },
           "Address": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
+          },
+          "serviceAddress": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address",
+            "description": "The service installation address (alias for Address)"
           },
           "billingAddress": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/billingAddress"
@@ -101,6 +129,9 @@
           }
         },
         "required": [
+          "eventId",
+          "eventType",
+          "eventTimestamp",
           "orgId",
           "orderId",
           "orderCreatedTimestamp",
@@ -115,6 +146,21 @@
         "type": "object",
         "description": "Event fired when a customer saves a draft order without submitting",
         "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this event"
+          },
+          "eventType": {
+            "type": "string",
+            "default": "ORDER_SAVED",
+            "description": "The type of the event"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event was emitted"
+          },
           "orgId": {
             "type": "string",
             "description": "Identifier of the organization/tenant"
@@ -124,11 +170,24 @@
             "format": "uuid",
             "description": "A unique identifier for this draft order"
           },
+          "orderStatus": {
+            "type": "string",
+            "default": "Draft",
+            "description": "The current status of the order (e.g., Draft)"
+          },
+          "orderType": {
+            "type": "string",
+            "description": "The type of order (e.g., New, Transfer, Upgrade)"
+          },
           "CustomerDetails": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
           },
           "Address": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
+          },
+          "serviceAddress": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address",
+            "description": "The service installation address (alias for Address)"
           },
           "billingAddress": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/billingAddress"
@@ -143,12 +202,27 @@
             }
           }
         },
-        "required": ["orgId", "orderId", "CustomerDetails", "Address"]
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "orderId", "CustomerDetails", "Address"]
       },
       "OrderConfirmedEvent": {
         "type": "object",
         "description": "Event fired when order is validated and accepted for fulfillment",
         "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this event"
+          },
+          "eventType": {
+            "type": "string",
+            "default": "ORDER_CONFIRMED",
+            "description": "The type of the event"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event was emitted"
+          },
           "orgId": {
             "type": "string",
             "description": "Identifier of the organization/tenant"
@@ -158,23 +232,47 @@
             "format": "uuid",
             "description": "The unique identifier of the order being confirmed"
           },
+          "orderStatus": {
+            "type": "string",
+            "default": "Confirmed",
+            "description": "The current status of the order"
+          },
           "confirmationTimestamp": {
             "type": "string",
             "format": "date-time",
             "description": "The timestamp when the order was confirmed"
           },
+          "confirmedBy": {
+            "type": "string",
+            "description": "Identifier of the user or system that confirmed the order (e.g., 'system-auto')"
+          },
           "status": {
             "type": "string",
             "default": "Confirmed",
-            "description": "The new status of the order"
+            "description": "The new status of the order (legacy field, prefer orderStatus)"
           }
         },
-        "required": ["orgId", "orderId", "confirmationTimestamp"]
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "orderId", "confirmationTimestamp"]
       },
       "OrderUpdatedEvent": {
         "type": "object",
         "description": "Event fired when an existing unfulfilled order is modified",
         "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this event"
+          },
+          "eventType": {
+            "type": "string",
+            "default": "ORDER_UPDATED",
+            "description": "The type of the event"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event was emitted"
+          },
           "orgId": {
             "type": "string",
             "description": "Identifier of the organization/tenant"
@@ -184,16 +282,31 @@
             "format": "uuid",
             "description": "The ID of the order being updated"
           },
+          "orderStatus": {
+            "type": "string",
+            "description": "The current status of the order after update (e.g., Confirmed)"
+          },
           "updatedTimestamp": {
             "type": "string",
             "format": "date-time",
             "description": "The timestamp of the update"
+          },
+          "updatedFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of field names that were modified in this update (e.g., ['CustomerDetails', 'serviceAddress'])"
           },
           "CustomerDetails": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
           },
           "Address": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
+          },
+          "serviceAddress": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address",
+            "description": "The service installation address (alias for Address)"
           },
           "billingAddress": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/billingAddress"
@@ -208,12 +321,27 @@
             }
           }
         },
-        "required": ["orgId", "orderId", "updatedTimestamp"]
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "orderId", "updatedTimestamp"]
       },
       "OrderCancelledEvent": {
         "type": "object",
         "description": "Event fired when an order is cancelled before fulfillment",
         "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this event"
+          },
+          "eventType": {
+            "type": "string",
+            "default": "ORDER_CANCELLED",
+            "description": "The type of the event"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event was emitted"
+          },
           "orgId": {
             "type": "string",
             "description": "Identifier of the organization/tenant"
@@ -223,6 +351,11 @@
             "format": "uuid",
             "description": "The unique identifier of the order being cancelled"
           },
+          "orderStatus": {
+            "type": "string",
+            "default": "Cancelled",
+            "description": "The current status of the order"
+          },
           "cancellationTimestamp": {
             "type": "string",
             "format": "date-time",
@@ -231,9 +364,122 @@
           "reason": {
             "type": "string",
             "description": "The reason for the cancellation"
+          },
+          "cancelledBy": {
+            "type": "string",
+            "description": "Identifier of the user or system that cancelled the order (e.g., 'Customer', 'Agent')"
+          },
+          "refundAmount": {
+            "$ref": "#/components/schemas/Price",
+            "description": "The refund amount issued upon cancellation, if applicable"
           }
         },
-        "required": ["orgId", "orderId", "cancellationTimestamp", "reason"]
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "orderId", "cancellationTimestamp", "reason"]
+      },
+      "OrderRescheduledEvent": {
+        "type": "object",
+        "description": "Event fired when an installation appointment is rescheduled",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this event"
+          },
+          "eventType": {
+            "type": "string",
+            "default": "ORDER_RESCHEDULED",
+            "description": "The type of the event"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event was emitted"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the order being rescheduled"
+          },
+          "orderStatus": {
+            "type": "string",
+            "default": "Rescheduled",
+            "description": "The current status of the order"
+          },
+          "previousAppointment": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Appointment",
+            "description": "The original appointment that was replaced"
+          },
+          "newAppointment": {
+            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Appointment",
+            "description": "The new appointment replacing the previous one"
+          },
+          "reason": {
+            "type": "string",
+            "description": "The reason for rescheduling"
+          },
+          "rescheduledBy": {
+            "type": "string",
+            "description": "Identifier of the user or system that rescheduled the appointment (e.g., 'Customer', 'Agent')"
+          }
+        },
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "orderId", "previousAppointment", "newAppointment"]
+      },
+      "OrderInstalledEvent": {
+        "type": "object",
+        "description": "Event fired when an order installation has been completed by a technician",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unique identifier for this event"
+          },
+          "eventType": {
+            "type": "string",
+            "default": "ORDER_INSTALLED",
+            "description": "The type of the event"
+          },
+          "eventTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event was emitted"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Identifier of the organization/tenant"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the installed order"
+          },
+          "orderStatus": {
+            "type": "string",
+            "default": "Installed",
+            "description": "The current status of the order"
+          },
+          "installationCompletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the physical installation was completed"
+          },
+          "technicianId": {
+            "type": "string",
+            "description": "The identifier of the technician who performed the installation"
+          },
+          "installationNotes": {
+            "type": "string",
+            "description": "Free-text notes recorded by the technician during installation"
+          },
+          "installationDurationMinutes": {
+            "type": "integer",
+            "description": "The total duration of the installation in minutes"
+          }
+        },
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "orderId", "installationCompletedAt", "technicianId"]
       }
     }
   },
@@ -253,8 +499,13 @@
                 "$ref": "#/components/schemas/OrderCreatedEvent"
               },
               "sample_event": {
+                "eventId": "550e8400-e29b-41d4-a716-446655440099",
+                "eventType": "ORDER_CREATED",
+                "eventTimestamp": "2024-01-15T10:30:00Z",
                 "orgId": "ORG-001",
                 "orderId": "550e8400-e29b-41d4-a716-446655440000",
+                "orderStatus": "New",
+                "orderType": "New",
                 "orderCreatedTimestamp": "2024-01-15T10:30:00Z",
                 "CustomerDetails": {
                   "id": "CUSTDET-001",
@@ -264,6 +515,14 @@
                   "mobileNumber": "+1-555-123-4567"
                 },
                 "Address": {
+                  "id": "ADDR-001",
+                  "orgId": "ORG-001",
+                  "street": "123 Main St",
+                  "city": "Springfield",
+                  "state": "IL",
+                  "zipCode": "62701"
+                },
+                "serviceAddress": {
                   "id": "ADDR-001",
                   "orgId": "ORG-001",
                   "street": "123 Main St",
@@ -339,8 +598,13 @@
                 "$ref": "#/components/schemas/OrderSavedEvent"
               },
               "sample_event": {
+                "eventId": "650e8400-e29b-41d4-a716-446655440099",
+                "eventType": "ORDER_SAVED",
+                "eventTimestamp": "2024-01-15T09:00:00Z",
                 "orgId": "ORG-001",
                 "orderId": "650e8400-e29b-41d4-a716-446655440001",
+                "orderStatus": "Draft",
+                "orderType": "New",
                 "CustomerDetails": {
                   "id": "CUSTDET-002",
                   "orgId": "ORG-001",
@@ -349,6 +613,14 @@
                   "mobileNumber": "+1-555-987-6543"
                 },
                 "Address": {
+                  "id": "ADDR-002",
+                  "orgId": "ORG-001",
+                  "street": "456 Oak Ave",
+                  "city": "Chicago",
+                  "state": "IL",
+                  "zipCode": "60601"
+                },
+                "serviceAddress": {
                   "id": "ADDR-002",
                   "orgId": "ORG-001",
                   "street": "456 Oak Ave",
@@ -409,9 +681,14 @@
                 "$ref": "#/components/schemas/OrderConfirmedEvent"
               },
               "sample_event": {
+                "eventId": "750e8400-e29b-41d4-a716-446655440099",
+                "eventType": "ORDER_CONFIRMED",
+                "eventTimestamp": "2024-01-15T11:00:00Z",
                 "orgId": "ORG-001",
                 "orderId": "550e8400-e29b-41d4-a716-446655440000",
+                "orderStatus": "Confirmed",
                 "confirmationTimestamp": "2024-01-15T11:00:00Z",
+                "confirmedBy": "system-auto",
                 "status": "Confirmed"
               }
             }
@@ -439,9 +716,14 @@
                 "$ref": "#/components/schemas/OrderUpdatedEvent"
               },
               "sample_event": {
+                "eventId": "850e8400-e29b-41d4-a716-446655440099",
+                "eventType": "ORDER_UPDATED",
+                "eventTimestamp": "2024-01-15T12:00:00Z",
                 "orgId": "ORG-001",
                 "orderId": "550e8400-e29b-41d4-a716-446655440000",
+                "orderStatus": "Confirmed",
                 "updatedTimestamp": "2024-01-15T12:00:00Z",
+                "updatedFields": ["CustomerDetails", "serviceAddress"],
                 "CustomerDetails": {
                   "id": "CUSTDET-001",
                   "orgId": "ORG-001",
@@ -450,6 +732,14 @@
                   "mobileNumber": "+1-555-123-4567"
                 },
                 "Address": {
+                  "id": "ADDR-001",
+                  "orgId": "ORG-001",
+                  "street": "123 Main St Apt 5",
+                  "city": "Springfield",
+                  "state": "IL",
+                  "zipCode": "62701"
+                },
+                "serviceAddress": {
                   "id": "ADDR-001",
                   "orgId": "ORG-001",
                   "street": "123 Main St Apt 5",
@@ -526,10 +816,102 @@
                 "$ref": "#/components/schemas/OrderCancelledEvent"
               },
               "sample_event": {
+                "eventId": "950e8400-e29b-41d4-a716-446655440099",
+                "eventType": "ORDER_CANCELLED",
+                "eventTimestamp": "2024-01-16T09:00:00Z",
                 "orgId": "ORG-001",
                 "orderId": "650e8400-e29b-41d4-a716-446655440001",
+                "orderStatus": "Cancelled",
                 "cancellationTimestamp": "2024-01-16T09:00:00Z",
-                "reason": "Customer requested cancellation due to change of address"
+                "reason": "Customer requested cancellation due to change of address",
+                "cancelledBy": "Customer",
+                "refundAmount": {
+                  "orgId": "ORG-001",
+                  "amount": 99.99,
+                  "currency": "USD"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-rescheduled": {
+      "post": {
+        "summary": "Order Rescheduled Event",
+        "description": "Publishes an appointment reschedule event to Kafka topic: order-rescheduled",
+        "tags": ["Order Events"],
+        "intent": "Order Management",
+        "sub_intent": "Reschedule Order Appointment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRescheduledEvent"
+              },
+              "sample_event": {
+                "eventId": "a50e8400-e29b-41d4-a716-446655440099",
+                "eventType": "ORDER_RESCHEDULED",
+                "eventTimestamp": "2024-01-16T14:30:00Z",
+                "orgId": "ORG-001",
+                "orderId": "550e8400-e29b-41d4-a716-446655440000",
+                "orderStatus": "Rescheduled",
+                "previousAppointment": {
+                  "id": "APPT-001",
+                  "orgId": "ORG-001",
+                  "preferredDate": "2024-01-20",
+                  "timeSlot": "Morning (8-12)"
+                },
+                "newAppointment": {
+                  "id": "APPT-003",
+                  "orgId": "ORG-001",
+                  "preferredDate": "2024-01-25",
+                  "timeSlot": "Afternoon (1-5)"
+                },
+                "reason": "Customer requested change",
+                "rescheduledBy": "Customer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for processing"
+          }
+        }
+      }
+    },
+    "/events/order-installed": {
+      "post": {
+        "summary": "Order Installed Event",
+        "description": "Publishes an installation completion event to Kafka topic: order-installed",
+        "tags": ["Order Events"],
+        "intent": "Order Management",
+        "sub_intent": "Mark Order as Installed",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderInstalledEvent"
+              },
+              "sample_event": {
+                "eventId": "b50e8400-e29b-41d4-a716-446655440099",
+                "eventType": "ORDER_INSTALLED",
+                "eventTimestamp": "2024-01-20T16:45:00Z",
+                "orgId": "ORG-001",
+                "orderId": "550e8400-e29b-41d4-a716-446655440000",
+                "orderStatus": "Installed",
+                "installationCompletedAt": "2024-01-20T16:30:00Z",
+                "technicianId": "TECH-5678",
+                "installationNotes": "Installation completed successfully. All equipment tested.",
+                "installationDurationMinutes": 120
               }
             }
           }
