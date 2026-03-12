@@ -179,9 +179,6 @@
           "CustomerDetails": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
           },
-          "Address": {
-            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
-          },
           "serviceAddress": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address",
             "description": "The service installation address (alias for Address)"
@@ -297,9 +294,6 @@
           },
           "CustomerDetails": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
-          },
-          "Address": {
-            "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address"
           },
           "serviceAddress": {
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/Address",
