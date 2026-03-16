@@ -116,7 +116,7 @@
           },
           "timeSlot": {
             "type": "string",
-            "enum": ["Morning (8-12)", "Afternoon (1-5)", "Anytime"],
+            "enum": ["Morning__8_12_", "Afternoon__1_5_", "Anytime"],
             "description": "The customer's preferred time window"
           }
         },
@@ -131,3 +131,4 @@
     }
   ]
 }
+

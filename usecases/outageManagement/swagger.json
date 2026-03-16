@@ -17,7 +17,7 @@
             "enum": ["Data", "Voice", "Video"]
           },
           "affectedCustomerCount": {
-            "type": "integer",
+            "type":"long",
             "description": "Number of customers impacted"
           }
         },
@@ -109,7 +109,7 @@
             }
           },
           "estimatedCustomersImpacted": {
-            "type": "integer"
+            "type":"long"
           }
         },
         "required": ["eventId", "eventType", "eventTimestamp", "orgId", "outageId"]
@@ -351,3 +351,4 @@
     }
   ]
 }
+
