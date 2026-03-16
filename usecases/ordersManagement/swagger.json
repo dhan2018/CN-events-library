@@ -466,7 +466,7 @@
             "description": "Free-text notes recorded by the technician during installation"
           },
           "installationDurationMinutes": {
-            "type": "integer",
+            "type":"long",
             "description": "The total duration of the installation in minutes"
           }
         },
@@ -938,3 +938,4 @@
     }
   ]
 }
+
