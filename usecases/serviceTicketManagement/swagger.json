@@ -151,7 +151,7 @@
           },
           "resolutionCode": {
             "type": "string",
-            "enum": ["Fixed Remotely", "Replaced Equipment", "Repaired Wiring", "Configuration Change"],
+            "enum": ["Fixed_Remotely", "Replaced_Equipment", "Repaired_Wiring", "Configuration_Change"],
             "description": "A code indicating the type of resolution"
           },
           "resolutionNotes": {
