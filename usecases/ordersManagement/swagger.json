@@ -525,7 +525,7 @@
                   "id": "APPT-001",
                   "orgId": "ORG-001",
                   "preferredDate": "2024-01-20",
-                  "timeSlot": "Morning (8-12)"
+                  "timeSlot": "Morning__8_12_"
                 },
                 "lineItems": [
                   {
@@ -631,7 +631,7 @@
                   "id": "APPT-002",
                   "orgId": "ORG-001",
                   "preferredDate": "2024-01-25",
-                  "timeSlot": "Afternoon (1-5)"
+                  "timeSlot": "Afternoon__1_5_"
                 },
                 "lineItems": [
                   {
@@ -742,7 +742,7 @@
                   "id": "APPT-004",
                   "orgId": "ORG-001",
                   "preferredDate": "2024-01-22",
-                  "timeSlot": "Afternoon (1-5)"
+                  "timeSlot": "Afternoon__1_5_"
                 },
                 "lineItems": [
                   {
@@ -849,13 +849,13 @@
                   "id": "APPT-001",
                   "orgId": "ORG-001",
                   "preferredDate": "2024-01-20",
-                  "timeSlot": "Morning (8-12)"
+                  "timeSlot": "Morning__8_12_"
                 },
                 "newAppointment": {
                   "id": "APPT-005",
                   "orgId": "ORG-001",
                   "preferredDate": "2024-01-27",
-                  "timeSlot": "Afternoon (1-5)"
+                  "timeSlot": "Afternoon__1_5_"
                 },
                 "reason": "Customer requested change due to scheduling conflict",
                 "rescheduledBy": "Customer"
