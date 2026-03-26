@@ -72,7 +72,6 @@
         "required": [
           "orgId",
           "ticketId",
-          "customerId",
           "CustomerDetails",
           "Address",
           "problemDescription",
@@ -127,7 +126,7 @@
             "$ref": "../../reusableComponents/swagger.json#/components/schemas/CustomerDetails"
           }
         },
-        "required": ["orgId", "ticketId", "technicianId", "appointmentDetails", "CustomerDetails"]
+        "required": ["orgId", "ticketId", "technicianId", "Appointment", "CustomerDetails"]
       },
       "ServiceTicketResolvedEvent": {
         "type": "object",
@@ -181,7 +180,6 @@
               "sample_event": {
                 "orgId": "ORG-001",
                 "ticketId": "550e8400-e29b-41d4-a716-446655440000",
-                "customerId": "CUST-12345",
                 "CustomerDetails": {
                   "id": "CUSTDET-001",
                   "orgId": "ORG-001",

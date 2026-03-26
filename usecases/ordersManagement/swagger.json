@@ -133,7 +133,7 @@
           "orderId",
           "orderCreatedTimestamp",
           "CustomerDetails",
-          "Address",
+          "serviceAddress",
           "billingAddress",
           "Appointment",
           "lineItems"
@@ -196,7 +196,7 @@
             }
           }
         },
-        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "orderId", "CustomerDetails", "Address"]
+        "required": ["eventId", "eventType", "eventTimestamp", "orgId", "orderId", "CustomerDetails", "serviceAddress"]
       },
       "OrderConfirmedEvent": {
         "type": "object",
@@ -505,14 +505,6 @@
                   "email": "john.smith@email.com",
                   "mobileNumber": "+1-555-123-4567"
                 },
-                "Address": {
-                  "id": "ADDR-001",
-                  "orgId": "ORG-001",
-                  "street": "123 Main St",
-                  "city": "Springfield",
-                  "state": "IL",
-                  "zipCode": "62701"
-                },
                 "serviceAddress": {
                   "id": "ADDR-001",
                   "orgId": "ORG-001",
@@ -618,14 +610,6 @@
                   "fullName": "Jane Doe",
                   "email": "jane.doe@email.com",
                   "mobileNumber": "+1-555-987-6543"
-                },
-                "Address": {
-                  "id": "ADDR-002",
-                  "orgId": "ORG-001",
-                  "street": "456 Oak Ave",
-                  "city": "Chicago",
-                  "state": "IL",
-                  "zipCode": "60601"
                 },
                 "serviceAddress": {
                   "id": "ADDR-002",
@@ -737,14 +721,6 @@
                   "fullName": "John Smith",
                   "email": "john.smith.updated@email.com",
                   "mobileNumber": "+1-555-123-9999"
-                },
-                "Address": {
-                  "id": "ADDR-001",
-                  "orgId": "ORG-001",
-                  "street": "123 Main St Apt 5",
-                  "city": "Springfield",
-                  "state": "IL",
-                  "zipCode": "62701"
                 },
                 "serviceAddress": {
                   "id": "ADDR-001",
