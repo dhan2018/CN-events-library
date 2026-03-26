@@ -273,7 +273,7 @@
                    "id": "APPT-001",
                    "orgId": "ORG-001",
                   "preferredDate": "2024-01-16",
-                  "timeSlot": "Morning (8-12)"
+                  "timeSlot": "Morning__8_12_"
                 },
                 "CustomerDetails": {
                     "id": "CUSTDET-001",
