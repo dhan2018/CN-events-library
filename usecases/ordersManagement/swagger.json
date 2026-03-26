@@ -643,6 +643,11 @@
                       "orgId": "ORG-001",
                       "amount": 49.99,
                       "currency": "USD"
+                    },
+                    "oneTimePrice": {
+                      "orgId": "ORG-001",
+                      "amount": 99.99,
+                      "currency": "USD"
                     }
                   }
                 ]
