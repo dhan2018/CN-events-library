@@ -16,7 +16,7 @@
             "description": "Identifier of the organization/tenant"
           },
           "amount": {
-            "type": "number",
+            "type": "double",
             "description": "The numeric value of the price"
           },
           "currency": {
@@ -466,7 +466,7 @@
             "description": "Free-text notes recorded by the technician during installation"
           },
           "installationDurationMinutes": {
-            "type":"long",
+            "type": "long",
             "description": "The total duration of the installation in minutes"
           }
         },
