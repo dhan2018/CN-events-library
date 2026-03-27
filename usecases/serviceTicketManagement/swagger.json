@@ -315,7 +315,7 @@
                 "ticketId": "550e8400-e29b-41d4-a716-446655440000",
                 "resolutionTimestamp": "2024-01-16T14:30:00Z",
                 "resolvedBy": "Field Technician Mike Johnson",
-                "resolutionCode": "Replaced Equipment",
+                "resolutionCode": "Replaced_Equipment",
                 "resolutionNotes": {
                   "orgId": "ORG-001",
                   "timestamp": "2024-01-16T14:30:00Z",
